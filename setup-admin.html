@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Admin - NeuroPixel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .setup-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #1e40af;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="setup-container">
+        <h1>Setup Admin Account</h1>
+        <p>Create an admin account to access the NeuroPixel dashboard</p>
+
+        <div class="info message">
+            <strong>Note:</strong> This page is only for initial setup. Use it once to create your admin account.
+        </div>
+
+        <form id="setupForm">
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="email" required placeholder="admin@neuropixel.com">
+            </div>
+            <div class="form-group">
+                <label>Password (min 6 characters)</label>
+                <input type="password" id="password" required minlength="6" placeholder="Enter secure password">
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="confirmPassword" required minlength="6" placeholder="Confirm password">
+            </div>
+            <button type="submit">Create Admin Account</button>
+        </form>
+
+        <div id="message"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getFirestore, collection, addDoc, Timestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTJ87liOWDstTyypJU0iKfyCqu6be5cos",
+            authDomain: "neuropixel-admin.firebaseapp.com",
+            projectId: "neuropixel-admin",
+            storageBucket: "neuropixel-admin.firebasestorage.app",
+            messagingSenderId: "956747718610",
+            appId: "1:956747718610:web:f1545d0ff783b5f147320b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.getElementById('setupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const messageEl = document.getElementById('message');
+            
+            if (password !== confirmPassword) {
+                messageEl.className = 'message error';
+                messageEl.textContent = 'Passwords do not match!';
+                return;
+            }
+            
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                
+                await addDoc(collection(db, 'admins'), {
+                    uid: userCredential.user.uid,
+                    email: email,
+                    createdAt: Timestamp.now()
+                });
+                
+                messageEl.className = 'message success';
+                messageEl.textContent = 'Admin account created successfully! You can now login using index.html';
+                
+                document.getElementById('setupForm').reset();
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+                
+            } catch (error) {
+                messageEl.className = 'message error';
+                if (error.code === 'auth/email-already-in-use') {
+                    messageEl.textContent = 'This email is already registered. Please login.';
+                } else {
+                    messageEl.textContent = 'Error: ' + error.message;
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

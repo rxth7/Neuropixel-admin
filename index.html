@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroPixel Admin - Redirecting...</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .loader {
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loader">
+        <div class="spinner"></div>
+        <h2>Redirecting...</h2>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTJ87liOWDstTyypJU0iKfyCqu6be5cos",
+            authDomain: "neuropixel-admin.firebaseapp.com",
+            projectId: "neuropixel-admin",
+            storageBucket: "neuropixel-admin.firebasestorage.app",
+            messagingSenderId: "956747718610",
+            appId: "1:956747718610:web:f1545d0ff783b5f147320b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Check authentication and redirect
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is logged in, go to dashboard
+                window.location.href = 'dashboard.html';
+            } else {
+                // User is not logged in, go to login
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+
+</html>
